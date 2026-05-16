@@ -1,0 +1,87 @@
+'use client';
+
+import { useActionState, useEffect, useState } from 'react';
+import { Plus, Edit2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { createProductAction, updateProductAction, type ActionState } from '@/lib/actions/products';
+import type { Product } from '@/lib/store/types';
+
+const initial: ActionState = {};
+
+export function ProductFormDialog({ product, trigger }: { product?: Product; trigger?: React.ReactElement }) {
+  const isEdit = !!product;
+  const [open, setOpen] = useState(false);
+  const [state, formAction, pending] = useActionState(
+    isEdit ? updateProductAction : createProductAction,
+    initial,
+  );
+
+  useEffect(() => {
+    if (state.ok) {
+      toast.success(isEdit ? 'Producto actualizado' : 'Producto creado');
+      setOpen(false);
+    }
+    if (state.error) toast.error(state.error);
+  }, [state, isEdit]);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          trigger ?? (
+            <Button className="h-9 px-4 rounded-lg bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_1px_2px_rgba(0,0,0,0.1)] transition-all font-medium text-sm flex items-center gap-2">
+              <Plus size={16} />
+              Agregar
+            </Button>
+          )
+        }
+      />
+      <DialogContent className="bg-card/95 backdrop-blur-xl border border-white/60 sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? 'Editar producto' : 'Nuevo producto'}</DialogTitle>
+        </DialogHeader>
+        <form action={formAction} className="space-y-4">
+          {isEdit && <input type="hidden" name="id" value={product!.id} />}
+          <Field label="Nombre" name="name" defaultValue={product?.name} error={state.fieldErrors?.name?.[0]} />
+          <Field label="Stock"  name="stock"   type="number" defaultValue={product?.stock?.toString()} error={state.fieldErrors?.stock?.[0]} />
+          <Field label="Categoría" name="category" defaultValue={product?.category} error={state.fieldErrors?.category?.[0]} />
+          <Field label="Valor" name="value" defaultValue={product?.value} error={state.fieldErrors?.value?.[0]} />
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button type="submit" disabled={pending} className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
+              {pending ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function EditProductButton({ product }: { product: Product }) {
+  return (
+    <ProductFormDialog
+      product={product}
+      trigger={
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg">
+          <Edit2 size={16} />
+        </Button>
+      }
+    />
+  );
+}
+
+function Field({ label, name, type = 'text', defaultValue, error }: { label: string; name: string; type?: string; defaultValue?: string; error?: string }) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={name} className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{label}</Label>
+      <Input id={name} name={name} type={type} defaultValue={defaultValue} className="bg-white/5 border-white/10 h-10" />
+      {error && <p className="text-destructive text-xs">{error}</p>}
+    </div>
+  );
+}
