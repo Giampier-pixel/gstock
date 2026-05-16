@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+.vercel
+next-env.d.ts
+*.tsbuildinfo
+
+# Local-only: planning artifacts and Claude Code state, never pushed to GitHub
+docs/superpowers/
+.claude/
