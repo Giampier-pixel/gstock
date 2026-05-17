@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
 import { DecorativeBlobs } from '@/components/layout/decorative-blobs';
+import { PageTransition } from '@/components/layout/page-transition';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -16,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar userName={name} userInitials={initials} />
       <main className="flex-1 overflow-auto p-8 h-full">
         <div className="max-w-[1000px] mx-auto flex flex-col h-full pt-2">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </div>
       </main>
     </div>

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package2, ArrowRightLeft, Users2, FileText, Settings, LogOut } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { LayoutDashboard, Package2, ArrowRightLeft, Users2, FileText, Settings, LogOut, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { signOutAction } from '@/lib/actions/auth';
@@ -18,6 +19,14 @@ const items = [
 
 export function Sidebar({ userName, userInitials }: { userName: string; userInitials: string }) {
   const pathname = usePathname();
+  const [pending, setPending] = useState<string | null>(null);
+
+  // When real navigation finishes, clear the pending hint
+  useEffect(() => {
+    setPending(null);
+  }, [pathname]);
+
+  const effective = pending ?? pathname;
 
   return (
     <aside className="w-[260px] bg-gradient-to-b from-sidebar/90 to-sidebar-accent/90 backdrop-blur-3xl text-sidebar-foreground flex flex-col h-full py-10 px-6 z-10 shadow-[4px_0_24px_rgba(82,92,141,0.15)] relative">
@@ -30,19 +39,25 @@ export function Sidebar({ userName, userInitials }: { userName: string; userInit
 
       <nav className="flex-1 flex flex-col gap-1.5 mt-2">
         {items.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + '/');
+          const active = effective === href || effective.startsWith(href + '/');
+          const isPending = pending === href && pathname !== href;
           return (
             <Link
               key={href}
               href={href}
-              className={`rounded-lg py-2.5 px-4 flex items-center gap-3 transition-colors ${
+              prefetch
+              onClick={() => {
+                if (href !== pathname) setPending(href);
+              }}
+              className={`group rounded-lg py-2.5 px-4 flex items-center gap-3 transition-all duration-150 ease-out ${
                 active
                   ? 'bg-gradient-to-r from-primary-foreground/15 to-primary-foreground/5 shadow-sm'
-                  : 'hover:bg-white/5 text-muted-foreground hover:text-white'
+                  : 'hover:bg-white/[0.08] hover:translate-x-0.5 text-muted-foreground hover:text-white'
               }`}
             >
-              <Icon size={18} className={active ? 'text-white' : ''} />
-              <span className={`${active ? 'text-white' : ''} font-medium text-[15px]`}>{label}</span>
+              <Icon size={18} className={`transition-colors ${active ? 'text-white' : ''}`} />
+              <span className={`flex-1 font-medium text-[15px] transition-colors ${active ? 'text-white' : ''}`}>{label}</span>
+              {isPending && <Loader2 size={14} className="text-white/70 animate-spin" />}
             </Link>
           );
         })}
@@ -58,7 +73,13 @@ export function Sidebar({ userName, userInitials }: { userName: string; userInit
             <span className="text-white/70 text-xs">Admin</span>
           </div>
         </div>
-        <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10 rounded-lg" title="Cerrar sesión">
+        <Button
+          type="submit"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10 rounded-lg"
+          title="Cerrar sesión"
+        >
           <LogOut size={16} />
         </Button>
       </form>
