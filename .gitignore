@@ -15,3 +15,4 @@ next-env.d.ts
 # Local-only: planning artifacts and Claude Code state, never pushed to GitHub
 docs/superpowers/
 .claude/
+CLAUDE.md
