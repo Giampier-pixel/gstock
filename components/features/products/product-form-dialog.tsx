@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { createProductAction, updateProductAction, type ActionState } from '@/lib/actions/products';
-import type { Product } from '@/lib/store/types';
+import type { Product } from '@/lib/api/types';
 
 const initial: ActionState = {};
 
@@ -46,10 +46,19 @@ export function ProductFormDialog({ product, trigger }: { product?: Product; tri
         </DialogHeader>
         <form action={formAction} className="space-y-4">
           {isEdit && <input type="hidden" name="id" value={product!.id} />}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="SKU" name="sku" defaultValue={product?.sku} error={state.fieldErrors?.sku?.[0]} />
+            <Field label="Categoría" name="category" defaultValue={product?.category} error={state.fieldErrors?.category?.[0]} />
+          </div>
           <Field label="Nombre" name="name" defaultValue={product?.name} error={state.fieldErrors?.name?.[0]} />
-          <Field label="Stock"  name="stock"   type="number" defaultValue={product?.stock?.toString()} error={state.fieldErrors?.stock?.[0]} />
-          <Field label="Categoría" name="category" defaultValue={product?.category} error={state.fieldErrors?.category?.[0]} />
-          <Field label="Valor" name="value" defaultValue={product?.value} error={state.fieldErrors?.value?.[0]} />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Precio (PEN)" name="price" type="number" defaultValue={product?.price} error={state.fieldErrors?.price?.[0]} />
+            <Field label="Costo (PEN)" name="cost" type="number" defaultValue={product?.cost} error={state.fieldErrors?.cost?.[0]} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Stock" name="stock" type="number" defaultValue={product?.stock?.toString()} error={state.fieldErrors?.stock?.[0]} />
+            <Field label="Stock mínimo" name="minStock" type="number" defaultValue={product?.minStock?.toString()} error={state.fieldErrors?.minStock?.[0]} />
+          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>

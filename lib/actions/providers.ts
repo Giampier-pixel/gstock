@@ -2,42 +2,92 @@
 
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
-import * as store from '@/lib/store/providers';
-import { providerCreateSchema, providerUpdateSchema } from '@/lib/store/types';
+import { apiFetch, ApiError } from '@/lib/api/client';
+import type { Provider } from '@/lib/api/types';
 import type { ActionState } from './products';
+
+interface ProviderBody {
+  name?: string;
+  contact?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+}
+
+function parseFormData(formData: FormData): { id?: string; body: ProviderBody; errors?: Record<string, string[]> } {
+  const id = formData.get('id')?.toString() || undefined;
+  const body: ProviderBody = {};
+  const errors: Record<string, string[]> = {};
+
+  const name = formData.get('name')?.toString().trim();
+  const contact = formData.get('contact')?.toString().trim();
+  const phone = formData.get('phone')?.toString().trim();
+  const email = formData.get('email')?.toString().trim();
+  const address = formData.get('address')?.toString().trim();
+  const notes = formData.get('notes')?.toString().trim();
+
+  if (name) body.name = name;
+  if (contact) body.contact = contact;
+  if (phone) body.phone = phone;
+  if (email) body.email = email;
+  if (address) body.address = address;
+  if (notes) body.notes = notes;
+
+  if (!id && !body.name) errors.name = ['El nombre es obligatorio'];
+
+  return { id, body, errors: Object.keys(errors).length ? errors : undefined };
+}
+
+function handleApiError(err: unknown): ActionState {
+  if (err instanceof ApiError) {
+    return { error: err.problem.detail ?? err.problem.title, fieldErrors: err.problem.errors };
+  }
+  return { error: 'Error de red. Reintentá.' };
+}
 
 export async function createProviderAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const session = await auth();
   if (!session) return { error: 'No autorizado' };
 
-  const parsed = providerCreateSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
+  const { body, errors } = parseFormData(formData);
+  if (errors) return { fieldErrors: errors };
 
-  store.createProvider(parsed.data);
-  revalidatePath('/providers');
-  return { ok: true };
+  try {
+    await apiFetch<Provider>('/v1/providers', { method: 'POST', body });
+    revalidatePath('/providers');
+    return { ok: true };
+  } catch (err) {
+    return handleApiError(err);
+  }
 }
 
 export async function updateProviderAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const session = await auth();
   if (!session) return { error: 'No autorizado' };
 
-  const parsed = providerUpdateSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
+  const { id, body, errors } = parseFormData(formData);
+  if (!id) return { error: 'Falta el id' };
+  if (errors) return { fieldErrors: errors };
 
-  const { id, ...patch } = parsed.data;
-  const result = store.updateProvider(id, patch);
-  if (!result) return { error: 'Proveedor no encontrado' };
-
-  revalidatePath('/providers');
-  return { ok: true };
+  try {
+    await apiFetch<Provider>(`/v1/providers/${id}`, { method: 'PATCH', body });
+    revalidatePath('/providers');
+    return { ok: true };
+  } catch (err) {
+    return handleApiError(err);
+  }
 }
 
 export async function deleteProviderAction(id: string): Promise<ActionState> {
   const session = await auth();
   if (!session) return { error: 'No autorizado' };
-  const ok = store.deleteProvider(id);
-  if (!ok) return { error: 'Proveedor no encontrado' };
-  revalidatePath('/providers');
-  return { ok: true };
+
+  try {
+    await apiFetch<void>(`/v1/providers/${id}`, { method: 'DELETE' });
+    revalidatePath('/providers');
+    return { ok: true };
+  } catch (err) {
+    return handleApiError(err);
+  }
 }

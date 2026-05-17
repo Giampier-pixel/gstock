@@ -2,32 +2,58 @@
 
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
-import * as store from '@/lib/store/movements';
-import { movementCreateSchema } from '@/lib/store/types';
+import { apiFetch, ApiError } from '@/lib/api/client';
+import type { Movement, MovementType } from '@/lib/api/types';
 import type { ActionState } from './products';
+
+function handleApiError(err: unknown): ActionState {
+  if (err instanceof ApiError) {
+    return { error: err.problem.detail ?? err.problem.title, fieldErrors: err.problem.errors };
+  }
+  return { error: 'Error de red. Reintentá.' };
+}
 
 export async function createMovementAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const session = await auth();
   if (!session) return { error: 'No autorizado' };
 
-  const parsed = movementCreateSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
+  const productId = formData.get('productId')?.toString().trim();
+  const type = formData.get('type')?.toString().trim() as MovementType | undefined;
+  const quantityRaw = formData.get('quantity')?.toString().trim();
+  const reason = formData.get('reason')?.toString().trim() || undefined;
 
-  store.createMovement({
-    ...parsed.data,
-    user: session.user?.name ?? 'Sistema',
-  });
-  revalidatePath('/movements');
-  revalidatePath('/dashboard');
-  return { ok: true };
+  const errors: Record<string, string[]> = {};
+  if (!productId) errors.productId = ['Seleccioná un producto'];
+  if (type !== 'IN' && type !== 'OUT') errors.type = ['Tipo inválido'];
+  const quantity = quantityRaw ? Number(quantityRaw) : NaN;
+  if (!Number.isInteger(quantity) || quantity < 1) errors.quantity = ['Cantidad inválida'];
+  if (Object.keys(errors).length) return { fieldErrors: errors };
+
+  try {
+    await apiFetch<Movement>('/v1/movements', {
+      method: 'POST',
+      body: { productId, type, quantity, reason },
+    });
+    revalidatePath('/movements');
+    revalidatePath('/dashboard');
+    revalidatePath('/products');
+    return { ok: true };
+  } catch (err) {
+    return handleApiError(err);
+  }
 }
 
 export async function deleteMovementAction(id: string): Promise<ActionState> {
   const session = await auth();
   if (!session) return { error: 'No autorizado' };
-  const ok = store.deleteMovement(id);
-  if (!ok) return { error: 'Movimiento no encontrado' };
-  revalidatePath('/movements');
-  revalidatePath('/dashboard');
-  return { ok: true };
+
+  try {
+    await apiFetch<void>(`/v1/movements/${id}`, { method: 'DELETE' });
+    revalidatePath('/movements');
+    revalidatePath('/dashboard');
+    revalidatePath('/products');
+    return { ok: true };
+  } catch (err) {
+    return handleApiError(err);
+  }
 }

@@ -6,11 +6,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { createProviderAction, updateProviderAction } from '@/lib/actions/providers';
 import type { ActionState } from '@/lib/actions/products';
-import type { Provider } from '@/lib/store/types';
+import type { Provider } from '@/lib/api/types';
 
 const initial: ActionState = {};
 
@@ -45,21 +44,14 @@ export function ProviderFormDialog({ provider, trigger }: { provider?: Provider;
         </DialogHeader>
         <form action={formAction} className="space-y-4">
           {isEdit && <input type="hidden" name="id" value={provider!.id} />}
-          <Field label="Nombre"   name="name"    defaultValue={provider?.name}    error={state.fieldErrors?.name?.[0]} />
-          <Field label="Contacto" name="contact" defaultValue={provider?.contact} error={state.fieldErrors?.contact?.[0]} />
-          <Field label="Email"    name="email"   type="email" defaultValue={provider?.email}   error={state.fieldErrors?.email?.[0]} />
-          <Field label="Teléfono" name="phone"   defaultValue={provider?.phone}   error={state.fieldErrors?.phone?.[0]} />
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Estado</Label>
-            <Select name="status" defaultValue={provider?.status ?? 'Activo'}>
-              <SelectTrigger className="w-full bg-white/5 border-white/10 h-10"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Activo">Activo</SelectItem>
-                <SelectItem value="Inactivo">Inactivo</SelectItem>
-              </SelectContent>
-            </Select>
+          <Field label="Nombre"   name="name"    defaultValue={provider?.name}             error={state.fieldErrors?.name?.[0]} />
+          <Field label="Contacto" name="contact" defaultValue={provider?.contact ?? ''}    error={state.fieldErrors?.contact?.[0]} />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Email"    name="email"   type="email" defaultValue={provider?.email ?? ''}   error={state.fieldErrors?.email?.[0]} />
+            <Field label="Teléfono" name="phone"                 defaultValue={provider?.phone ?? ''}   error={state.fieldErrors?.phone?.[0]} />
           </div>
+          <Field label="Dirección" name="address" defaultValue={provider?.address ?? ''}   error={state.fieldErrors?.address?.[0]} />
+          <Field label="Notas"     name="notes"   defaultValue={provider?.notes ?? ''}     error={state.fieldErrors?.notes?.[0]} />
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
