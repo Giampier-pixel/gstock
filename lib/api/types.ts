@@ -8,6 +8,8 @@ export interface ApiUser {
   name: string;
   email: string;
   role: Role;
+  emailNotifications: boolean;
+  darkMode: boolean;
 }
 
 export interface AuthResponse {

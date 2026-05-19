@@ -1,9 +1,9 @@
 import { ArrowRightLeft, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/page-header';
 import { RevenueAreaChart } from '@/components/features/reports/revenue-area-chart';
 import { CategoryBarChart } from '@/components/features/reports/category-bar-chart';
+import { ExportCsvButton } from '@/components/features/reports/export-csv-button';
 import { apiFetch } from '@/lib/api/client';
 import type { CategoryBreakdown, RevenuePoint } from '@/lib/api/types';
 
@@ -40,7 +40,7 @@ export default async function ReportsPage() {
               <h3 className="text-foreground text-[11px] font-semibold uppercase tracking-widest leading-[1.2]">Ingresos por venta</h3>
               <p className="text-muted-foreground text-xs mt-1">Últimos 14 días</p>
             </div>
-            <Button variant="outline" size="sm" className="h-8 text-xs border-primary/20 bg-card/50 hover:bg-card shadow-sm transition-all text-foreground">Exportar CSV</Button>
+            <ExportCsvButton revenue={revenue} categories={categories} />
           </div>
           <div className="flex-1 min-h-[250px] w-full">
             <RevenueAreaChart data={revenueChartData} />

@@ -10,12 +10,16 @@ declare module 'next-auth' {
       name?: string | null;
       email?: string | null;
       image?: string | null;
+      emailNotifications?: boolean;
+      darkMode?: boolean;
     };
   }
 
   interface User {
     accessToken?: string;
     username?: string;
+    emailNotifications?: boolean;
+    darkMode?: boolean;
   }
 }
 
@@ -24,5 +28,7 @@ declare module 'next-auth/jwt' {
     accessToken?: string;
     username?: string;
     sub?: string;
+    emailNotifications?: boolean;
+    darkMode?: boolean;
   }
 }

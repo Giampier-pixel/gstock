@@ -2,7 +2,15 @@ const API_BASE = process.env.API_URL ?? 'https://gstock-api.vercel.app';
 
 export interface ApiLoginResponse {
   accessToken: string;
-  user: { id: string; username: string; name: string; email: string; role: string };
+  user: {
+    id: string;
+    username: string;
+    name: string;
+    email: string;
+    role: string;
+    emailNotifications: boolean;
+    darkMode: boolean;
+  };
 }
 
 export async function apiLogin(username: string, password: string): Promise<ApiLoginResponse | null> {
