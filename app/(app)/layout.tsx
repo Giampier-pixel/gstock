@@ -3,12 +3,20 @@ import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
 import { DecorativeBlobs } from '@/components/layout/decorative-blobs';
 import { PageTransition } from '@/components/layout/page-transition';
+import { apiFetch } from '@/lib/api/client';
+import type { ApiUser } from '@/lib/api/types';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const name = session.user.name ?? 'Usuario';
+  let name = session.user.name ?? 'Usuario';
+  try {
+    const me = await apiFetch<ApiUser>('/v1/auth/me');
+    name = me.name;
+  } catch {
+    // Fall back to session name if the API is unreachable.
+  }
   const initials = name.split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase();
 
   return (

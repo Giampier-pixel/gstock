@@ -56,7 +56,7 @@ export async function updateProfileAction(
 
   try {
     await apiFetch<ApiUser>('/v1/auth/me', { method: 'PATCH', body });
-    revalidatePath('/settings');
+    revalidatePath('/', 'layout');
     return { ok: true };
   } catch (err) {
     return handleApiError(err);
@@ -110,7 +110,7 @@ export async function updatePreferencesAction(input: {
 
   try {
     await apiFetch<ApiUser>('/v1/auth/me/preferences', { method: 'PATCH', body });
-    revalidatePath('/settings');
+    revalidatePath('/', 'layout');
     return { ok: true };
   } catch (err) {
     return handleApiError(err);
