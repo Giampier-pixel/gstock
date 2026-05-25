@@ -6,7 +6,6 @@ import { updatePreferencesAction } from '@/lib/actions/account';
 
 interface Preferences {
   emailNotifications: boolean;
-  darkMode: boolean;
 }
 
 export function PreferencesCard({ initial }: { initial: Preferences }) {
@@ -36,13 +35,6 @@ export function PreferencesCard({ initial }: { initial: Preferences }) {
         active={values.emailNotifications}
         disabled={pending}
         onToggle={() => toggle('emailNotifications')}
-      />
-      <ToggleRow
-        title="Modo Oscuro"
-        description="Tema visual de la aplicación."
-        active={values.darkMode}
-        disabled={pending}
-        onToggle={() => toggle('darkMode')}
       />
     </div>
   );
@@ -75,7 +67,7 @@ function ToggleRow({
         onClick={onToggle}
         disabled={disabled}
         className={`w-10 h-6 rounded-full relative transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
-          active ? 'bg-primary' : 'bg-[hsl(var(--muted))]'
+          active ? 'bg-primary' : 'bg-muted'
         }`}
       >
         <span

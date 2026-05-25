@@ -90,37 +90,37 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #11162A;
+  --foreground: #F5F7FF;
+  --card: #171D34;
+  --card-foreground: #F5F7FF;
+  --popover: #171D34;
+  --popover-foreground: #F5F7FF;
+  --primary: #6E7FC0;
+  --primary-foreground: #ffffff;
+  --secondary: #232B49;
+  --secondary-foreground: #F5F7FF;
+  --muted: #232B49;
+  --muted-foreground: #A3B6D4;
+  --accent: #2D385E;
+  --accent-foreground: #F5F7FF;
+  --destructive: #D04B32;
+  --border: #2D385E;
+  --input: #3B4770;
+  --ring: #A3B6D4;
+  --chart-1: #A3B6D4;
+  --chart-2: #6E7FC0;
+  --chart-3: #D4DAF1;
+  --chart-4: #F5F7FF;
+  --chart-5: #31A66A;
+  --sidebar: #171D34;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #A3B6D4;
+  --sidebar-primary-foreground: #171D34;
+  --sidebar-accent: #232B49;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2D385E;
+  --sidebar-ring: #A3B6D4;
 }
 
 @layer base {
@@ -132,5 +132,23 @@
   }
   html {
     @apply font-sans;
+  }
+
+  [data-sonner-toast].cn-toast {
+    border: 0 !important;
+    background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 82%, transparent)) !important;
+    color: var(--primary-foreground) !important;
+    box-shadow: 0 16px 36px -18px rgba(42, 50, 86, 0.7) !important;
+  }
+
+  [data-sonner-toast].cn-toast [data-icon],
+  [data-sonner-toast].cn-toast .cn-toast-icon,
+  [data-sonner-toast].cn-toast-title,
+  [data-sonner-toast].cn-toast-description {
+    color: var(--primary-foreground) !important;
+  }
+
+  [data-sonner-toast].cn-toast .cn-toast-description {
+    opacity: 0.86;
   }
 }

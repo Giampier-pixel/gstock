@@ -25,7 +25,6 @@ export default async function SettingsPage() {
   const name = me?.name ?? sessionName;
   const email = me?.email ?? sessionEmail;
   const emailNotifications = me?.emailNotifications ?? true;
-  const darkMode = me?.darkMode ?? false;
   const initials = name
     .split(/\s+/)
     .map((p) => p[0])
@@ -64,7 +63,7 @@ export default async function SettingsPage() {
 
         <Card className="bg-card/60 backdrop-blur-xl rounded-xl p-6 shadow-sm border-white/60">
           <h2 className="text-lg font-semibold text-foreground mb-4">Preferencias</h2>
-          <PreferencesCard initial={{ emailNotifications, darkMode }} />
+          <PreferencesCard initial={{ emailNotifications }} />
         </Card>
       </div>
     </>

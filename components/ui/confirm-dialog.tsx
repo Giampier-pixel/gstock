@@ -45,15 +45,15 @@ export function ConfirmDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
-      <DialogContent className="bg-card/95 backdrop-blur-xl border border-white/60 sm:max-w-md">
+      <DialogContent className="bg-primary text-primary-foreground border border-primary sm:max-w-md shadow-[0_20px_60px_-18px_rgba(42,50,86,0.65)]">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+          <DialogTitle className="text-primary-foreground">{title}</DialogTitle>
+          {description && <DialogDescription className="text-primary-foreground/85">{description}</DialogDescription>}
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="-mx-0 -mb-0 rounded-none border-t-0 bg-transparent p-0 pt-2">
           <DialogClose
             render={
-              <Button type="button" variant="outline" disabled={pending}>
+              <Button type="button" variant="outline" disabled={pending} className="h-10 border-white/35 bg-white/10 text-white hover:bg-white/20 hover:text-white">
                 {cancelLabel}
               </Button>
             }
@@ -64,8 +64,8 @@ export function ConfirmDialog({
             disabled={pending}
             className={
               destructive
-                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                : 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground'
+                ? 'h-10 bg-destructive text-white hover:bg-destructive/90'
+                : 'h-10 bg-white text-primary hover:bg-white/90'
             }
           >
             {pending ? 'Procesando…' : confirmLabel}

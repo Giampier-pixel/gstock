@@ -23,7 +23,7 @@ export function Sidebar({ userName, userInitials }: { userName: string; userInit
 
   // When real navigation finishes, clear the pending hint
   useEffect(() => {
-    setPending(null);
+    queueMicrotask(() => setPending(null));
   }, [pathname]);
 
   const effective = pending ?? pathname;

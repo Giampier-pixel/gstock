@@ -4,17 +4,31 @@ import { ProductFormDialog } from '@/components/features/products/product-form-d
 
 export const metadata = { title: 'Productos — gstock' };
 
-export default function ProductsPage() {
+type PageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function parsePage(value: string | string[] | undefined): number {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const page = Number(raw ?? '1');
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
+export default async function ProductsPage({ searchParams }: PageProps) {
+  const params = searchParams ? await searchParams : {};
+  const page = parsePage(params.page);
+
   return (
     <>
       <PageHeader
         title="Productos"
         subtitle={'Gestión de inventario\ny catálogo'}
         showFilters
+        filterOptions={['Categoría', 'Estado']}
         showAddButton
         onAddClick={<ProductFormDialog />}
       />
-      <ProductsTable />
+      <ProductsTable page={page} />
     </>
   );
 }
