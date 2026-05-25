@@ -1,6 +1,10 @@
+import { ArrowDownRight, ArrowUpRight, Package, AlertTriangle, ShoppingCart, Wallet, ArrowLeftRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api/client';
-import type { DashboardKpis } from '@/lib/api/types';
+import type { DashboardKpis, RevenuePoint } from '@/lib/api/types';
+import { Sparkline } from './sparkline';
+
+const PEN = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 });
 
 export async function KpiCards() {
   let kpis: DashboardKpis = {
@@ -10,46 +14,106 @@ export async function KpiCards() {
     movementsToday: { in: 0, out: 0 },
     inventoryValue: 0,
   };
+  let revenue: RevenuePoint[] = [];
   try {
-    kpis = await apiFetch<DashboardKpis>('/v1/dashboard/kpis');
+    [kpis, revenue] = await Promise.all([
+      apiFetch<DashboardKpis>('/v1/dashboard/kpis'),
+      apiFetch<RevenuePoint[]>('/v1/reports/revenue?days=7'),
+    ]);
   } catch {
-    // keep zeros on transient API errors; page still renders
+    // keep zeros + empty series on transient API errors; page still renders
   }
 
+  const revenueSeries = revenue.map((r) => r.revenue);
+  const unitsOutSeries = revenue.map((r) => r.unitsOut);
+  const movementsTotal = kpis.movementsToday.in + kpis.movementsToday.out;
+
   return (
-    <div className="grid grid-cols-3 gap-6 mb-8 relative z-10">
-      <Card className="relative bg-card/60 backdrop-blur-xl rounded-xl p-6 shadow-sm border-white/60 h-[130px] overflow-hidden flex flex-col justify-between group">
-        <div className="absolute inset-x-0 -top-px h-px w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="relative z-10">
-          <h3 className="text-muted-foreground text-[11px] font-semibold uppercase tracking-widest leading-[1.2]">SKUs<br />TOTALES</h3>
-          <p className="text-[32px] font-semibold text-foreground leading-none mt-2 tracking-tight">{kpis.totalSkus.toLocaleString('es-PE')}</p>
-        </div>
-        <div className="relative z-10 w-full h-1 bg-muted rounded-full mt-4 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-primary to-primary/50 rounded-full w-[45%]" />
-        </div>
-      </Card>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8 relative z-10">
+      <KpiCard
+        label="SKUs totales"
+        value={kpis.totalSkus.toLocaleString('es-PE')}
+        icon={<Package size={16} />}
+        accentClass="text-foreground"
+      />
 
-      <Card className="relative bg-card/60 backdrop-blur-xl rounded-xl p-6 shadow-sm border-white/60 h-[130px] overflow-hidden flex flex-col justify-between group">
-        <div className="absolute inset-x-0 -top-px h-px w-full bg-gradient-to-r from-transparent via-[#e74c3c]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="relative z-10">
-          <h3 className="text-muted-foreground text-[11px] font-semibold uppercase tracking-widest leading-[1.2]">STOCK<br />BAJO</h3>
-          <p className="text-[32px] font-semibold text-[#e74c3c] leading-none mt-2 tracking-tight">{kpis.lowStockCount}</p>
-        </div>
-        <div className="relative z-10 w-full h-1 bg-muted rounded-full mt-4 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-[#c0392b] to-[#e74c3c] rounded-full w-[15%]" />
-        </div>
-      </Card>
+      <KpiCard
+        label="Stock bajo"
+        value={kpis.lowStockCount.toString()}
+        icon={<AlertTriangle size={16} />}
+        accentClass="text-[#e74c3c]"
+        tone={kpis.lowStockCount > 0 ? 'alert' : undefined}
+      />
 
-      <Card className="relative bg-card/60 backdrop-blur-xl rounded-xl p-6 shadow-sm border-white/60 h-[130px] overflow-hidden flex flex-col justify-between group">
-        <div className="absolute inset-x-0 -top-px h-px w-full bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="relative z-10">
-          <h3 className="text-muted-foreground text-[11px] font-semibold uppercase tracking-widest leading-[1.2]">ÓRDENES HOY<br />&nbsp;</h3>
-          <p className="text-[32px] font-semibold text-emerald-600 leading-none mt-2 -translate-y-[14px] tracking-tight">{kpis.ordersToday}</p>
-        </div>
-        <div className="relative z-10 w-full h-1 bg-muted rounded-full mt-4 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full w-[60%]" />
-        </div>
-      </Card>
+      <KpiCard
+        label="Órdenes hoy"
+        value={kpis.ordersToday.toString()}
+        icon={<ShoppingCart size={16} />}
+        accentClass="text-emerald-600"
+        sparkline={
+          revenueSeries.length > 1 ? (
+            <Sparkline data={revenueSeries} color="#10b981" gradientId="spark-orders" />
+          ) : null
+        }
+      />
+
+      <KpiCard
+        label="Valor inventario"
+        value={PEN.format(kpis.inventoryValue)}
+        icon={<Wallet size={16} />}
+        accentClass="text-foreground"
+        valueSizeClass="text-[24px]"
+      />
+
+      <KpiCard
+        label="Movimientos hoy"
+        value={movementsTotal.toString()}
+        icon={<ArrowLeftRight size={16} />}
+        accentClass="text-primary"
+        footer={
+          <div className="flex items-center gap-3 text-[11px] font-medium">
+            <span className="inline-flex items-center gap-1 text-emerald-600">
+              <ArrowDownRight size={12} /> {kpis.movementsToday.in} in
+            </span>
+            <span className="inline-flex items-center gap-1 text-[#e74c3c]">
+              <ArrowUpRight size={12} /> {kpis.movementsToday.out} out
+            </span>
+          </div>
+        }
+        sparkline={
+          unitsOutSeries.length > 1 ? (
+            <Sparkline data={unitsOutSeries} color="#4F46E5" gradientId="spark-mov" />
+          ) : null
+        }
+      />
     </div>
+  );
+}
+
+type KpiCardProps = {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  accentClass?: string;
+  valueSizeClass?: string;
+  tone?: 'alert';
+  sparkline?: React.ReactNode;
+  footer?: React.ReactNode;
+};
+
+function KpiCard({ label, value, icon, accentClass = 'text-foreground', valueSizeClass = 'text-[32px]', tone, sparkline, footer }: KpiCardProps) {
+  return (
+    <Card className="relative bg-card/60 backdrop-blur-xl rounded-xl p-5 shadow-sm border-white/60 h-[140px] overflow-hidden flex flex-col justify-between group transition-transform hover:-translate-y-0.5">
+      <div className={`absolute inset-x-0 -top-px h-px w-full bg-gradient-to-r from-transparent ${tone === 'alert' ? 'via-[#e74c3c]/30' : 'via-primary/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
+      <div className="relative z-10 flex items-start justify-between">
+        <h3 className="text-muted-foreground text-[11px] font-semibold uppercase tracking-widest leading-tight">{label}</h3>
+        <span className="text-muted-foreground/70">{icon}</span>
+      </div>
+      <div className="relative z-10">
+        <p className={`${valueSizeClass} font-semibold ${accentClass} leading-none tracking-tight`}>{value}</p>
+        {footer ? <div className="mt-2">{footer}</div> : null}
+      </div>
+      {sparkline ? <div className="relative z-10 -mx-1">{sparkline}</div> : null}
+    </Card>
   );
 }

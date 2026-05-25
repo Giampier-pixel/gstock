@@ -8,11 +8,9 @@ import type { ActionState } from './products';
 
 interface ProviderBody {
   name?: string;
-  contact?: string;
   phone?: string;
   email?: string;
   address?: string;
-  notes?: string;
 }
 
 function parseFormData(formData: FormData): { id?: string; body: ProviderBody; errors?: Record<string, string[]> } {
@@ -21,18 +19,14 @@ function parseFormData(formData: FormData): { id?: string; body: ProviderBody; e
   const errors: Record<string, string[]> = {};
 
   const name = formData.get('name')?.toString().trim();
-  const contact = formData.get('contact')?.toString().trim();
   const phone = formData.get('phone')?.toString().trim();
   const email = formData.get('email')?.toString().trim();
   const address = formData.get('address')?.toString().trim();
-  const notes = formData.get('notes')?.toString().trim();
 
   if (name) body.name = name;
-  if (contact) body.contact = contact;
   if (phone) body.phone = phone;
   if (email) body.email = email;
   if (address) body.address = address;
-  if (notes) body.notes = notes;
 
   if (!id && !body.name) errors.name = ['El nombre es obligatorio'];
 

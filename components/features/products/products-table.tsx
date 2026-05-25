@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { apiFetch } from '@/lib/api/client';
 import type { Paginated, Product, ProductStatus } from '@/lib/api/types';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { EditProductButton } from './product-form-dialog';
 import { DeleteProductButton } from './delete-product-button';
 
@@ -23,12 +24,16 @@ function statusClasses(status: ProductStatus): string {
   return 'bg-gradient-to-r from-primary to-primary/80';
 }
 
-export async function ProductsTable() {
+export async function ProductsTable({ page: currentPage = 1 }: { page?: number }) {
   let products: Product[] = [];
+  let totalPages = 1;
+  let page = currentPage;
   let errorMsg: string | null = null;
   try {
-    const page = await apiFetch<Paginated<Product>>('/v1/products?pageSize=100');
-    products = page.data;
+    const response = await apiFetch<Paginated<Product>>(`/v1/products?page=${currentPage}&pageSize=10`);
+    products = response.data;
+    page = response.meta.page;
+    totalPages = response.meta.totalPages;
   } catch (err) {
     errorMsg = err instanceof Error ? err.message : 'No se pudo cargar';
   }
@@ -82,6 +87,7 @@ export async function ProductsTable() {
           ))}
         </TableBody>
       </Table>
+      <TablePagination basePath="/products" page={page} totalPages={totalPages} />
     </div>
   );
 }

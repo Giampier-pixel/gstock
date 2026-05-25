@@ -22,8 +22,10 @@ export function ProviderFormDialog({ provider, trigger }: { provider?: Provider;
   );
 
   useEffect(() => {
-    if (state.ok) { toast.success(isEdit ? 'Proveedor actualizado' : 'Proveedor creado'); setOpen(false); }
-    if (state.error) toast.error(state.error);
+    if (state.ok) {
+      toast.success(isEdit ? 'Proveedor actualizado' : 'Proveedor creado');
+      queueMicrotask(() => setOpen(false));
+    }
   }, [state, isEdit]);
 
   return (
@@ -45,17 +47,16 @@ export function ProviderFormDialog({ provider, trigger }: { provider?: Provider;
         <form action={formAction} className="space-y-4">
           {isEdit && <input type="hidden" name="id" value={provider!.id} />}
           <Field label="Nombre"   name="name"    defaultValue={provider?.name}             error={state.fieldErrors?.name?.[0]} />
-          <Field label="Contacto" name="contact" defaultValue={provider?.contact ?? ''}    error={state.fieldErrors?.contact?.[0]} />
           <div className="grid grid-cols-2 gap-3">
             <Field label="Email"    name="email"   type="email" defaultValue={provider?.email ?? ''}   error={state.fieldErrors?.email?.[0]} />
             <Field label="Teléfono" name="phone"                 defaultValue={provider?.phone ?? ''}   error={state.fieldErrors?.phone?.[0]} />
           </div>
           <Field label="Dirección" name="address" defaultValue={provider?.address ?? ''}   error={state.fieldErrors?.address?.[0]} />
-          <Field label="Notas"     name="notes"   defaultValue={provider?.notes ?? ''}     error={state.fieldErrors?.notes?.[0]} />
+          {state.error && <p className="text-sm font-medium text-destructive">{state.error}</p>}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button type="submit" disabled={pending} className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="h-11 px-5 text-[15px]">Cancelar</Button>
+            <Button type="submit" disabled={pending} className="h-11 px-5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-[15px]">
               {pending ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear'}
             </Button>
           </DialogFooter>
@@ -82,8 +83,15 @@ function Field({ label, name, type = 'text', defaultValue, error }: { label: str
   return (
     <div className="space-y-1.5">
       <Label htmlFor={name} className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">{label}</Label>
-      <Input id={name} name={name} type={type} defaultValue={defaultValue} className="bg-white/5 border-white/10 h-10" />
-      {error && <p className="text-destructive text-xs">{error}</p>}
+      <Input
+        id={name}
+        name={name}
+        type={type}
+        defaultValue={defaultValue}
+        aria-invalid={!!error}
+        className="h-11 border-primary/40 bg-background/80 shadow-sm focus-visible:border-primary focus-visible:ring-primary/30"
+      />
+      {error && <p className="text-xs font-medium text-destructive">{error}</p>}
     </div>
   );
 }

@@ -8,13 +8,13 @@ export const authConfig = {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
       const pathname = request.nextUrl.pathname;
-      const isLogin = pathname === '/login';
+      const isAuthPage = pathname === '/login' || pathname === '/recuperar-password';
       const isPublicAsset =
         pathname.startsWith('/_next') ||
         pathname.startsWith('/api/auth') ||
         pathname === '/favicon.ico';
 
-      if (isLogin) {
+      if (isAuthPage) {
         if (isLoggedIn) return Response.redirect(new URL('/dashboard', request.nextUrl));
         return true;
       }

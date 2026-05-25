@@ -8,11 +8,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        username: { label: 'Usuario', type: 'text' },
+        email: { label: 'Correo', type: 'email' },
         password: { label: 'Contraseña', type: 'password' },
       },
       async authorize(credentials) {
-        const username = String(credentials?.username ?? '');
+        const username = String(credentials?.email ?? '');
         const password = String(credentials?.password ?? '');
         if (!username || !password) return null;
 

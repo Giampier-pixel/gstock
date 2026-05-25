@@ -1,16 +1,25 @@
-import { Search, Plus, Filter } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FilterDropdown } from '@/components/layout/filter-dropdown';
 
 export type PageHeaderProps = {
   title: string;
   subtitle: string;
   showFilters?: boolean;
+  filterOptions?: string[];
   showAddButton?: boolean;
   onAddClick?: React.ReactNode;
 };
 
-export function PageHeader({ title, subtitle, showFilters = false, showAddButton = false, onAddClick }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  showFilters = false,
+  filterOptions = ['Categoría', 'Estado'],
+  showAddButton = false,
+  onAddClick,
+}: PageHeaderProps) {
   return (
     <header className="flex flex-row items-end justify-between mb-8 relative z-10 w-full">
       <div className="mb-[-4px]">
@@ -22,10 +31,7 @@ export function PageHeader({ title, subtitle, showFilters = false, showAddButton
 
       <div className="flex items-center gap-4">
         {showFilters && (
-          <Button variant="outline" className="h-9 px-3 rounded-lg border-primary/20 bg-card/50 hover:bg-card text-foreground shadow-sm transition-all text-sm flex items-center gap-2">
-            <Filter size={16} />
-            Filtros
-          </Button>
+          <FilterDropdown options={filterOptions} />
         )}
         <div className="relative group/input">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground group-focus-within/input:text-primary transition-colors">

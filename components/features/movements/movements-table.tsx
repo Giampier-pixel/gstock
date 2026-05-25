@@ -1,6 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { apiFetch } from '@/lib/api/client';
 import type { Movement, Paginated } from '@/lib/api/types';
+import { TablePagination } from '@/components/ui/table-pagination';
 
 const TYPE_LABEL = { IN: 'Entrada', OUT: 'Salida' } as const;
 
@@ -10,12 +11,16 @@ function formatDate(iso: string): string {
   return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
 }
 
-export async function MovementsTable() {
+export async function MovementsTable({ page: currentPage = 1 }: { page?: number }) {
   let movements: Movement[] = [];
+  let totalPages = 1;
+  let page = currentPage;
   let errorMsg: string | null = null;
   try {
-    const page = await apiFetch<Paginated<Movement>>('/v1/movements?pageSize=100');
-    movements = page.data;
+    const response = await apiFetch<Paginated<Movement>>(`/v1/movements?page=${currentPage}&pageSize=10`);
+    movements = response.data;
+    page = response.meta.page;
+    totalPages = response.meta.totalPages;
   } catch (err) {
     errorMsg = err instanceof Error ? err.message : 'No se pudo cargar';
   }
@@ -68,6 +73,7 @@ export async function MovementsTable() {
           })}
         </TableBody>
       </Table>
+      <TablePagination basePath="/movements" page={page} totalPages={totalPages} />
     </div>
   );
 }

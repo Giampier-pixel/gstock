@@ -1,5 +1,6 @@
 import { PageHeader } from '@/components/layout/page-header';
 import { KpiCards } from '@/components/features/dashboard/kpi-cards';
+import { PendingActions } from '@/components/features/dashboard/pending-actions';
 
 export const metadata = { title: 'Dashboard — gstock' };
 
@@ -11,6 +12,7 @@ export default function DashboardPage() {
     <>
       <PageHeader title="Dashboard" subtitle={`${today}\n${year}`} />
       <KpiCards />
+      <PendingActions />
     </>
   );
 }

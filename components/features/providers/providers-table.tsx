@@ -1,15 +1,20 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { apiFetch } from '@/lib/api/client';
 import type { Paginated, Provider } from '@/lib/api/types';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { EditProviderButton } from './provider-form-dialog';
 import { DeleteProviderButton } from './delete-provider-button';
 
-export async function ProvidersTable() {
+export async function ProvidersTable({ page: currentPage = 1 }: { page?: number }) {
   let providers: Provider[] = [];
+  let totalPages = 1;
+  let page = currentPage;
   let errorMsg: string | null = null;
   try {
-    const page = await apiFetch<Paginated<Provider>>('/v1/providers?pageSize=100');
-    providers = page.data;
+    const response = await apiFetch<Paginated<Provider>>(`/v1/providers?page=${currentPage}&pageSize=10`);
+    providers = response.data;
+    page = response.meta.page;
+    totalPages = response.meta.totalPages;
   } catch (err) {
     errorMsg = err instanceof Error ? err.message : 'No se pudo cargar';
   }
@@ -25,7 +30,6 @@ export async function ProvidersTable() {
         <TableHeader className="bg-gradient-to-r from-primary to-primary/90">
           <TableRow className="hover:bg-transparent border-none">
             <TableHead className="text-primary-foreground px-6 py-[14px] font-medium text-xs tracking-wider h-auto">PROVEEDOR</TableHead>
-            <TableHead className="text-primary-foreground px-4 py-[14px] font-medium text-xs tracking-wider h-auto">CONTACTO</TableHead>
             <TableHead className="text-primary-foreground px-4 py-[14px] font-medium text-xs tracking-wider h-auto">EMAIL</TableHead>
             <TableHead className="text-primary-foreground px-4 py-[14px] font-medium text-xs tracking-wider h-auto">TELÉFONO</TableHead>
             <TableHead className="text-primary-foreground px-4 py-[14px] font-medium text-xs tracking-wider h-auto">DIRECCIÓN</TableHead>
@@ -35,13 +39,12 @@ export async function ProvidersTable() {
         <TableBody>
           {providers.length === 0 && !errorMsg && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground py-8">Sin proveedores.</TableCell>
+              <TableCell colSpan={5} className="text-center text-muted-foreground py-8">Sin proveedores.</TableCell>
             </TableRow>
           )}
           {providers.map((item) => (
             <TableRow key={item.id} className="border-b border-border/40 hover:bg-muted/30 transition-colors text-sm last:border-0 group">
               <TableCell className="px-6 py-[14px] font-medium text-foreground">{item.name}</TableCell>
-              <TableCell className="px-4 py-[14px] font-medium text-foreground">{item.contact ?? '—'}</TableCell>
               <TableCell className="px-4 py-[14px] font-medium text-foreground">{item.email ?? '—'}</TableCell>
               <TableCell className="px-4 py-[14px] font-medium text-foreground">{item.phone ?? '—'}</TableCell>
               <TableCell className="px-4 py-[14px] font-medium text-muted-foreground">{item.address ?? '—'}</TableCell>
@@ -55,6 +58,7 @@ export async function ProvidersTable() {
           ))}
         </TableBody>
       </Table>
+      <TablePagination basePath="/providers" page={page} totalPages={totalPages} />
     </div>
   );
 }

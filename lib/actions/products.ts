@@ -56,8 +56,8 @@ function parseFormData(formData: FormData): { id?: string; body: ProductFormBody
   }
   if (stockRaw !== undefined && stockRaw !== '') {
     const n = Number(stockRaw);
-    if (Number.isInteger(n) && n >= 0) body.stock = n;
-    else errors.stock = ['Stock inválido'];
+    if (Number.isInteger(n) && n >= 1) body.stock = n;
+    else errors.stock = ['El stock no puede ser menor a 1'];
   }
   if (minStockRaw !== undefined && minStockRaw !== '') {
     const n = Number(minStockRaw);
